@@ -1,0 +1,37 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web;
+@using byte5.sitemapV8.Models;
+@using System.Xml.Serialization;
+
+@{
+    Layout = null;
+
+    byte5.sitemapV8.Models.Sitemap sitemap = new byte5.sitemapV8.Models.Sitemap();
+
+    var test = Enum.Parse(typeof(Location.eChangeFrequency), "daily").ToString();
+
+    var siteRoot = Model.AncestorOrSelf(1);
+
+    sitemap.Add(new Location()
+    {
+        Url = siteRoot.Url,
+        ChangeFrequency = Location.eChangeFrequency.daily,
+        Priority = 0.5D
+    });
+
+    foreach (var item in siteRoot.Descendants())
+    {
+        sitemap.Add(new Location()
+        {
+            Url = item.Url,
+            ChangeFrequency = Location.eChangeFrequency.weekly,
+            Priority = 0.5D
+        });
+    }
+
+    Response.Clear();
+    XmlSerializer xs = new XmlSerializer(typeof(byte5.sitemapV8.Models.Sitemap));
+    Response.ContentType = "text/xml";
+    xs.Serialize(Response.Output, sitemap);
+    Response.End();
+}
